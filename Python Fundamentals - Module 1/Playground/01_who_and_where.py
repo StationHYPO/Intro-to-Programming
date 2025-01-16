@@ -23,7 +23,10 @@ print(" ")
 gas_price = float(input(f"What is the average gas price in your area, {name}? $"))
 print(" ")
 
+mph = float(input(f"How fast do you drive to {place} in your {vehicle}, {name}? MPH: "))
+
 gallons = distance / mpg
 cost = gallons * gas_price
+time = distance / mph
 
-print(f"That means that it will take about {gallons:.2f} gallons of gasoline to get to {place}. It will cost you approximately ${cost:.2f}.  That isn't too much money, {name}? ")
+print(f"That means that it will take about {gallons:.2f} gallons of gasoline to drive to {place} and it will take you approximately {time:.2f} hours. It will cost you approximately ${cost:.2f}.  That isn't too much money, {name}? ")
