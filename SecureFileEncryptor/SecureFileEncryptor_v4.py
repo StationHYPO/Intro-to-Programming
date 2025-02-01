@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 SecureFileEncryptor_v4.py
-Version: v4.0.0
+Version: v4.0.1
 
 A GUI file encryption/decryption tool that uses AES-GCM in both single-shot
 and chunked modes. In chunked mode, the encryption binds a digest of the header
@@ -9,6 +9,7 @@ and chunked modes. In chunked mode, the encryption binds a digest of the header
 integrity protection against header or chunk tampering.
 
 Improvements in this version:
+  - Added secondary password confirmation to mitigate key typos.
   - Enhanced AAD in chunked mode: header digest + sequence number.
   - Increased care in memory sanitization of key material.
   - Additional flushing and syncing before secure deletion.
@@ -39,7 +40,7 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 # Program metadata
 PROGRAM_NAME = "SecureFileEncryptor"
-VERSION = "v4.0.0"
+VERSION = "v4.0.1"
 
 # Constants for chunked processing
 CHUNK_THRESHOLD = 10 * 1024 * 1024  # 10 MB threshold
@@ -85,11 +86,15 @@ class FileEncryptorApp(tk.Tk):
         key_frame = tk.Frame(self)
         key_frame.pack(pady=10)
         key_label = tk.Label(key_frame, text="Key:")
-        key_label.pack(side=tk.LEFT)
+        key_label.grid(row=0, column=0, padx=5, sticky="e")
         self.key_entry = tk.Entry(key_frame, width=50, show="*")
-        self.key_entry.pack(side=tk.LEFT, padx=5)
+        self.key_entry.grid(row=0, column=1, padx=5)
+        confirm_label = tk.Label(key_frame, text="Confirm Key:")
+        confirm_label.grid(row=1, column=0, padx=5, sticky="e")
+        self.confirm_entry = tk.Entry(key_frame, width=50, show="*")
+        self.confirm_entry.grid(row=1, column=1, padx=5)
         generate_button = tk.Button(key_frame, text="Generate Key", command=self.generate_key)
-        generate_button.pack(side=tk.LEFT)
+        generate_button.grid(row=0, column=2, rowspan=2, padx=5)
 
         # Checkbox for secure deletion option.
         self.delete_var = tk.BooleanVar()
@@ -120,7 +125,9 @@ class FileEncryptorApp(tk.Tk):
             key = base64.urlsafe_b64encode(AESGCM.generate_key(bit_length=256)).decode('utf-8')
             self.key_entry.delete(0, tk.END)
             self.key_entry.insert(0, key)
-            messagebox.showinfo("Key Generated", "A new key has been generated and inserted into the key field.")
+            self.confirm_entry.delete(0, tk.END)
+            self.confirm_entry.insert(0, key)
+            messagebox.showinfo("Key Generated", "A new key has been generated and inserted into the key fields.")
         except Exception as e:
             logging.exception("Key generation failed")
             messagebox.showerror("Error", "Key generation failed. Please try again.")
@@ -186,8 +193,14 @@ class FileEncryptorApp(tk.Tk):
             return
 
         key_str = self.key_entry.get().strip()
-        if not key_str:
-            messagebox.showwarning("No Key", "Please enter or generate a key.")
+        confirm_str = self.confirm_entry.get().strip()
+
+        if not key_str or not confirm_str:
+            messagebox.showwarning("Missing Key", "Please enter and confirm the key.")
+            return
+
+        if key_str != confirm_str:
+            messagebox.showerror("Key Mismatch", "The key and its confirmation do not match. Please re-enter.")
             return
 
         try:
@@ -307,16 +320,24 @@ class FileEncryptorApp(tk.Tk):
             except Exception:
                 pass
             self.key_entry.delete(0, tk.END)
+            self.confirm_entry.delete(0, tk.END)
 
     def decrypt_file(self):
-        """Decrypt a file encrypted by SecureFileEncryptor v4.0.0 in either single-shot or chunked mode."""
+        """Decrypt a file encrypted by SecureFileEncryptor."""
         if not self.selected_file:
             messagebox.showwarning("No File Selected", "Please select a file to decrypt.")
             return
 
         key_str = self.key_entry.get().strip()
+        confirm_str = self.confirm_entry.get().strip()
+
         if not key_str:
             messagebox.showwarning("No Key", "Please enter the decryption key.")
+            return
+
+        # If a confirmation is provided, ensure it matches the key.
+        if confirm_str and key_str != confirm_str:
+            messagebox.showerror("Key Mismatch", "The key and its confirmation do not match.")
             return
 
         try:
@@ -473,6 +494,7 @@ class FileEncryptorApp(tk.Tk):
             except Exception:
                 pass
             self.key_entry.delete(0, tk.END)
+            self.confirm_entry.delete(0, tk.END)
 
 if __name__ == "__main__":
     app = FileEncryptorApp()
