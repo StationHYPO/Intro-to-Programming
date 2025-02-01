@@ -1,0 +1,15 @@
+2025-02-01 12:11:06,634 - ERROR - Decryption failed
+Traceback (most recent call last):
+  File "/Users/christopherpadilla/Library/Mobile Documents/com~apple~CloudDocs/Python Projects/Intro to Programming/SecureFileEncryptor/SecureFileEncryptor_v5.py", line 488, in decrypt_file
+    raise ValueError("Missing required header parameters for chunked mode.")
+ValueError: Missing required header parameters for chunked mode.
+2025-02-01 12:13:59,814 - ERROR - Decryption failed
+Traceback (most recent call last):
+  File "/Users/christopherpadilla/Library/Mobile Documents/com~apple~CloudDocs/Python Projects/Intro to Programming/SecureFileEncryptor/SecureFileEncryptor_v5.py", line 435, in decrypt_file
+    raise ValueError("Missing NONCE in header.")
+ValueError: Missing NONCE in header.
+2025-02-01 12:14:30,038 - ERROR - Decryption failed
+Traceback (most recent call last):
+  File "/Users/christopherpadilla/Library/Mobile Documents/com~apple~CloudDocs/Python Projects/Intro to Programming/SecureFileEncryptor/SecureFileEncryptor_v5.py", line 435, in decrypt_file
+    raise ValueError("Missing NONCE in header.")
+ValueError: Missing NONCE in header.
